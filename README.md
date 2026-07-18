@@ -49,6 +49,37 @@ curl http://localhost:3000/health
 { "status": "ok", "service": "fiapx-api", "timestamp": "...", "uptime": 1.23 }
 ```
 
+## Autenticação
+
+O acesso às rotas protegidas usa **JWT** no cabeçalho `Authorization: Bearer <token>`.
+As variáveis `JWT_SECRET` e `JWT_EXPIRACAO_SEGUNDOS` estão em [`.env.example`](.env.example).
+
+> A persistência hoje é **em memória** (os usuários somem quando o processo reinicia).
+> A ligação com o Postgres entra em uma etapa seguinte.
+
+| Método | Rota | Protegida | Descrição |
+|---|---|---|---|
+| POST | `/auth/cadastro` | não | Cria um usuário. Corpo: `{ "email", "senha" }`. Senha com no mínimo 8 caracteres. |
+| POST | `/auth/login` | não | Valida as credenciais e devolve `{ "token" }`. |
+| GET | `/auth/eu` | sim | Devolve os dados do usuário do token. |
+
+### Exemplo
+
+```bash
+# cadastro
+curl -X POST http://localhost:3000/auth/cadastro \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"fulano@email.com","senha":"senhaforte1"}'
+
+# login (guarde o token retornado)
+curl -X POST http://localhost:3000/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"fulano@email.com","senha":"senhaforte1"}'
+
+# rota protegida
+curl http://localhost:3000/auth/eu -H "Authorization: Bearer <token>"
+```
+
 ## Testes
 
 ```bash
@@ -64,14 +95,22 @@ npm run typecheck
 
 ## Estrutura
 
+O código segue Clean Architecture, com as dependências apontando para o domínio:
+`dominio` (regras e contratos) ← `aplicacao` (casos de uso) ← `adaptadores` (Express, JWT, bcrypt, repositório).
+
 ```
 src/
-├── app.ts            # monta a aplicação Express (sem escutar porta)
-├── server.ts         # sobe o servidor HTTP
+├── app.ts                    # raiz de composição: monta a aplicação Express
+├── server.ts                 # sobe o servidor HTTP
 ├── config/
-│   └── env.ts        # configuração lida do ambiente
+│   └── env.ts                # configuração lida do ambiente
+├── dominio/                  # entidades, contratos de repositório e erros
+├── aplicacao/                # casos de uso (cadastrar, autenticar) e portas
+├── adaptadores/              # implementações: repositório em memória, bcrypt, JWT
+│   └── http/                 # rotas, middleware de auth e tratador de erros
 └── routes/
-    └── health.ts     # GET /health
+    └── health.ts             # GET /health
 test/
-└── health.test.ts
+├── health.test.ts
+└── auth/                     # testes unitários e de integração da autenticação
 ```
