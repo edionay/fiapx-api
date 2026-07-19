@@ -14,6 +14,8 @@ import { ServicoTokenJwt } from "./adaptadores/servico-token-jwt.js";
 import { CadastrarUsuario } from "./aplicacao/cadastrar-usuario.js";
 import { AutenticarUsuario } from "./aplicacao/autenticar-usuario.js";
 import { EnviarVideo } from "./aplicacao/enviar-video.js";
+import { ListarVideos } from "./aplicacao/listar-videos.js";
+import { ConsultarVideo } from "./aplicacao/consultar-video.js";
 import { criarMiddlewareAuth } from "./adaptadores/http/middleware-auth.js";
 import { rotasAuth } from "./adaptadores/http/rotas-auth.js";
 import { rotasVideo } from "./adaptadores/http/rotas-video.js";
@@ -47,6 +49,8 @@ export function buildApp(opcoes: OpcoesApp = {}): Express {
     opcoes.armazenamentoVideo ??
     new ArmazenamentoVideoSistemaArquivos(env.uploadsDir);
   const enviarVideo = new EnviarVideo(repositorioVideo, armazenamentoVideo, geradorId);
+  const listarVideos = new ListarVideos(repositorioVideo);
+  const consultarVideo = new ConsultarVideo(repositorioVideo);
 
   const upload = multer({
     storage: multer.memoryStorage(),
@@ -62,7 +66,15 @@ export function buildApp(opcoes: OpcoesApp = {}): Express {
       repositorio: repositorioUsuario,
     }),
   );
-  app.use(rotasVideo({ enviarVideo, middlewareAuth, upload }));
+  app.use(
+    rotasVideo({
+      enviarVideo,
+      listarVideos,
+      consultarVideo,
+      middlewareAuth,
+      upload,
+    }),
+  );
 
   app.use((_req, res) => {
     res.status(404).json({ erro: "Rota não encontrada" });

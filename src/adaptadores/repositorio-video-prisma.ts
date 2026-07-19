@@ -29,4 +29,11 @@ export class RepositorioVideoPrisma implements RepositorioVideo {
   async buscarPorId(id: string): Promise<Video | null> {
     return this.prisma.video.findUnique({ where: { id } });
   }
+
+  async listarPorUsuario(usuarioId: string): Promise<Video[]> {
+    return this.prisma.video.findMany({
+      where: { usuarioId },
+      orderBy: { criadoEm: "desc" },
+    });
+  }
 }

@@ -24,3 +24,9 @@ export class TokenInvalido extends ErroDominio {
     super("Token de autenticação inválido ou expirado");
   }
 }
+
+export class VideoNaoEncontrado extends ErroDominio {
+  constructor() {
+    super("Vídeo não encontrado");
+  }
+}

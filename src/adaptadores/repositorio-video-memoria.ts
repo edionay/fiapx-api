@@ -11,4 +11,10 @@ export class RepositorioVideoMemoria implements RepositorioVideo {
   async buscarPorId(id: string): Promise<Video | null> {
     return this.porId.get(id) ?? null;
   }
+
+  async listarPorUsuario(usuarioId: string): Promise<Video[]> {
+    return [...this.porId.values()]
+      .filter((video) => video.usuarioId === usuarioId)
+      .sort((a, b) => b.criadoEm.getTime() - a.criadoEm.getTime());
+  }
 }

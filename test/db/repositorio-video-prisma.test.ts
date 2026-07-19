@@ -49,4 +49,10 @@ describe.skipIf(!databaseUrl)("RepositorioVideoPrisma", () => {
     expect(salvo?.status).toBe("PENDENTE");
     expect(salvo?.nomeOriginal).toBe("filme.mp4");
   });
+
+  it("lista os vídeos do usuário", async () => {
+    const lista = await repositorio.listarPorUsuario(usuarioId);
+    expect(lista.map((v) => v.id)).toContain(videoId);
+    expect(lista.every((v) => v.usuarioId === usuarioId)).toBe(true);
+  });
 });
