@@ -1,6 +1,7 @@
 import express, { type Express } from "express";
 import { env } from "./config/env.js";
 import { healthRouter } from "./routes/health.js";
+import type { RepositorioUsuario } from "./dominio/repositorio-usuario.js";
 import { RepositorioUsuarioMemoria } from "./adaptadores/repositorio-usuario-memoria.js";
 import { HashSenhaBcrypt } from "./adaptadores/hash-senha-bcrypt.js";
 import { GeradorIdUuid } from "./adaptadores/gerador-id-uuid.js";
@@ -11,12 +12,17 @@ import { criarMiddlewareAuth } from "./adaptadores/http/middleware-auth.js";
 import { rotasAuth } from "./adaptadores/http/rotas-auth.js";
 import { tratadorErros } from "./adaptadores/http/tratador-erros.js";
 
-export function buildApp(): Express {
+export interface OpcoesApp {
+  repositorioUsuario?: RepositorioUsuario;
+}
+
+export function buildApp(opcoes: OpcoesApp = {}): Express {
   const app = express();
 
   app.use(express.json());
 
-  const repositorioUsuario = new RepositorioUsuarioMemoria();
+  const repositorioUsuario =
+    opcoes.repositorioUsuario ?? new RepositorioUsuarioMemoria();
   const hashSenha = new HashSenhaBcrypt();
   const geradorId = new GeradorIdUuid();
   const servicoToken = new ServicoTokenJwt(env.jwtSecret, env.jwtExpiracaoSegundos);

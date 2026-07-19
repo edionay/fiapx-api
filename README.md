@@ -11,13 +11,15 @@ envio de vídeo, consulta de status/catálogo e download dos pacotes gerados.
 - **Node** ≥ 22
 - **Express** 5
 - **TypeScript** (ESM)
+- **Postgres** com **Prisma** (driver adapter `@prisma/adapter-pg`)
 - **Vitest** + **supertest** para testes
 
-> O TSOA/Swagger entra em uma etapa seguinte. Este é o servidor inicial.
+> O TSOA/Swagger entra em uma etapa seguinte.
 
 ## Pré-requisitos
 
 - Node ≥ 22 e npm.
+- Postgres (opcional em desenvolvimento; sem `DATABASE_URL` a API usa memória).
 
 ## Instalação
 
@@ -54,9 +56,6 @@ curl http://localhost:3000/health
 O acesso às rotas protegidas usa **JWT** no cabeçalho `Authorization: Bearer <token>`.
 As variáveis `JWT_SECRET` e `JWT_EXPIRACAO_SEGUNDOS` estão em [`.env.example`](.env.example).
 
-> A persistência hoje é **em memória** (os usuários somem quando o processo reinicia).
-> A ligação com o Postgres entra em uma etapa seguinte.
-
 | Método | Rota | Protegida | Descrição |
 |---|---|---|---|
 | POST | `/auth/cadastro` | não | Cria um usuário. Corpo: `{ "email", "senha" }`. Senha com no mínimo 8 caracteres. |
@@ -80,6 +79,28 @@ curl -X POST http://localhost:3000/auth/login \
 curl http://localhost:3000/auth/eu -H "Authorization: Bearer <token>"
 ```
 
+## Banco de dados
+
+A persistência usa **Postgres** através do **Prisma** (driver adapter `@prisma/adapter-pg`).
+A conexão vem de `DATABASE_URL`. Sem essa variável a API cai para persistência em memória,
+o que é conveniente em desenvolvimento e nos testes.
+
+O cliente Prisma é gerado em `src/gerado/prisma` (fora do controle de versão) por
+`prisma generate`, que roda sozinho no `postinstall` e no `build`.
+
+```bash
+# aplica as migrações e gera o cliente (desenvolvimento)
+npm run prisma:migrate
+
+# aplica as migrações pendentes (produção)
+npm run prisma:deploy
+
+# apenas regenera o cliente
+npm run prisma:generate
+```
+
+O modelo `Usuario` mapeia a tabela `usuarios`. A tabela de vídeos entra na etapa de vídeo.
+
 ## Testes
 
 ```bash
@@ -99,18 +120,24 @@ O código segue Clean Architecture, com as dependências apontando para o domín
 `dominio` (regras e contratos) ← `aplicacao` (casos de uso) ← `adaptadores` (Express, JWT, bcrypt, repositório).
 
 ```
+prisma/
+├── schema.prisma             # modelo Usuario (tabela usuarios)
+└── migrations/               # migrações versionadas
+prisma.config.ts              # configuração do Prisma (datasource das migrações)
 src/
 ├── app.ts                    # raiz de composição: monta a aplicação Express
-├── server.ts                 # sobe o servidor HTTP
+├── server.ts                 # sobe o servidor HTTP e escolhe o repositório
 ├── config/
 │   └── env.ts                # configuração lida do ambiente
 ├── dominio/                  # entidades, contratos de repositório e erros
 ├── aplicacao/                # casos de uso (cadastrar, autenticar) e portas
-├── adaptadores/              # implementações: repositório em memória, bcrypt, JWT
-│   └── http/                 # rotas, middleware de auth e tratador de erros
+├── adaptadores/              # repositórios (memória e Prisma), bcrypt, JWT
+│   ├── http/                 # rotas, middleware de auth e tratador de erros
+│   └── prisma/               # criação do PrismaClient com o adapter
 └── routes/
     └── health.ts             # GET /health
 test/
 ├── health.test.ts
-└── auth/                     # testes unitários e de integração da autenticação
+├── auth/                     # testes unitários e de integração da autenticação
+└── db/                       # integração do repositório Prisma (roda com DATABASE_URL)
 ```
