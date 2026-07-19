@@ -16,3 +16,7 @@ export interface ServicoToken {
   emitir(payload: PayloadToken): string;
   verificar(token: string): PayloadToken;
 }
+
+export interface ArmazenamentoVideo {
+  salvarEntrada(videoId: string, nomeOriginal: string, conteudo: Buffer): Promise<string>;
+}

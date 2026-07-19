@@ -17,6 +17,8 @@ RUN npm ci --omit=dev --ignore-scripts
 
 FROM base AS runtime
 ENV PORT=3000
+ENV UPLOADS_DIR=/data/uploads
+RUN mkdir -p /data/uploads && chown -R node:node /data
 COPY --from=prod-deps /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
 COPY package.json ./
