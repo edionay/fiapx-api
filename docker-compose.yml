@@ -36,8 +36,11 @@ services:
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/fiapx?schema=public
       JWT_SECRET: troque-este-segredo-em-producao
       JWT_EXPIRACAO_SEGUNDOS: "3600"
+      UPLOADS_DIR: /data/uploads
     ports:
       - "3000:3000"
+    volumes:
+      - videos:/data
     depends_on:
       postgres:
         condition: service_healthy
@@ -46,3 +49,4 @@ services:
 
 volumes:
   pgdata:
+  videos:

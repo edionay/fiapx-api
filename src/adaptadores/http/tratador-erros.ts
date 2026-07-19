@@ -1,4 +1,5 @@
 import type { ErrorRequestHandler } from "express";
+import { MulterError } from "multer";
 import {
   CredenciaisInvalidas,
   DadosInvalidos,
@@ -7,6 +8,11 @@ import {
 } from "../../dominio/erros.js";
 
 export const tratadorErros: ErrorRequestHandler = (err, _req, res, _next) => {
+  if (err instanceof MulterError) {
+    const status = err.code === "LIMIT_FILE_SIZE" ? 413 : 400;
+    res.status(status).json({ erro: err.message });
+    return;
+  }
   if (err instanceof DadosInvalidos) {
     res.status(400).json({ erro: err.message });
     return;

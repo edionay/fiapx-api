@@ -4,6 +4,8 @@ export interface Env {
   readonly jwtSecret: string;
   readonly jwtExpiracaoSegundos: number;
   readonly databaseUrl: string | undefined;
+  readonly uploadsDir: string;
+  readonly maxUploadBytes: number;
 }
 
 function readInt(raw: string | undefined, fallback: number, nome: string): number {
@@ -45,4 +47,6 @@ export const env: Env = {
   jwtSecret: readSecret(process.env.JWT_SECRET, nodeEnv),
   jwtExpiracaoSegundos: readInt(process.env.JWT_EXPIRACAO_SEGUNDOS, 3600, "JWT_EXPIRACAO_SEGUNDOS"),
   databaseUrl: readDatabaseUrl(process.env.DATABASE_URL, nodeEnv),
+  uploadsDir: process.env.UPLOADS_DIR?.trim() || "/data/uploads",
+  maxUploadBytes: readInt(process.env.MAX_UPLOAD_BYTES, 100 * 1024 * 1024, "MAX_UPLOAD_BYTES"),
 };

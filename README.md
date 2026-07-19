@@ -79,6 +79,24 @@ curl -X POST http://localhost:3000/auth/login \
 curl http://localhost:3000/auth/eu -H "Authorization: Bearer <token>"
 ```
 
+## Vídeos
+
+O envio de vídeo é protegido por JWT. O arquivo é gravado no diretório configurado em
+`UPLOADS_DIR` e o vídeo é registrado com status `PENDENTE`.
+
+| Método | Rota | Protegida | Descrição |
+|---|---|---|---|
+| POST | `/videos` | sim | Recebe o arquivo no campo `arquivo` (multipart) e cria o vídeo como `PENDENTE`. Responde `202` com `{ "videoId", "status" }`. |
+
+```bash
+curl -X POST http://localhost:3000/videos \
+  -H "Authorization: Bearer <token>" \
+  -F "arquivo=@filme.mp4"
+```
+
+> Nesta fatia o vídeo apenas é recebido e persistido como `PENDENTE`. A publicação na fila
+> `videos.processar` (RabbitMQ) e o catálogo/status entram nas próximas etapas.
+
 ## Banco de dados
 
 A persistência usa **Postgres** através do **Prisma** (driver adapter `@prisma/adapter-pg`).
@@ -162,9 +180,9 @@ src/
 ├── server.ts                 # sobe o servidor HTTP e escolhe o repositório
 ├── config/
 │   └── env.ts                # configuração lida do ambiente
-├── dominio/                  # entidades, contratos de repositório e erros
-├── aplicacao/                # casos de uso (cadastrar, autenticar) e portas
-├── adaptadores/              # repositórios (memória e Prisma), bcrypt, JWT
+├── dominio/                  # entidades (usuario, video), contratos e erros
+├── aplicacao/                # casos de uso (cadastrar, autenticar, enviar vídeo) e portas
+├── adaptadores/              # repositórios (memória e Prisma), bcrypt, JWT, armazenamento
 │   ├── http/                 # rotas, middleware de auth e tratador de erros
 │   └── prisma/               # criação do PrismaClient com o adapter
 └── routes/
@@ -172,5 +190,6 @@ src/
 test/
 ├── health.test.ts
 ├── auth/                     # testes unitários e de integração da autenticação
-└── db/                       # integração do repositório Prisma (roda com DATABASE_URL)
+├── video/                    # testes do envio de vídeo (caso de uso e HTTP)
+└── db/                       # integração dos repositórios Prisma (roda com DATABASE_URL)
 ```

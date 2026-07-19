@@ -13,6 +13,30 @@ model Usuario {
   email     String   @unique
   senhaHash String   @map("senha_hash")
   criadoEm  DateTime @default(now()) @map("criado_em")
+  videos    Video[]
 
   @@map("usuarios")
+}
+
+model Video {
+  id             String      @id
+  usuarioId      String      @map("usuario_id")
+  nomeOriginal   String      @map("nome_original")
+  caminhoEntrada String      @map("caminho_entrada")
+  status         StatusVideo @default(PENDENTE)
+  caminhoZip     String?     @map("caminho_zip")
+  mensagemErro   String?     @map("mensagem_erro")
+  criadoEm       DateTime    @default(now()) @map("criado_em")
+  atualizadoEm   DateTime    @updatedAt @map("atualizado_em")
+  usuario        Usuario     @relation(fields: [usuarioId], references: [id])
+
+  @@index([usuarioId])
+  @@map("videos")
+}
+
+enum StatusVideo {
+  PENDENTE
+  PROCESSANDO
+  CONCLUIDO
+  ERRO
 }
