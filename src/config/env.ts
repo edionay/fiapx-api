@@ -3,6 +3,7 @@ export interface Env {
   readonly nodeEnv: string;
   readonly jwtSecret: string;
   readonly jwtExpiracaoSegundos: number;
+  readonly databaseUrl: string | undefined;
 }
 
 function readInt(raw: string | undefined, fallback: number, nome: string): number {
@@ -28,6 +29,14 @@ function readSecret(raw: string | undefined, nodeEnv: string): string {
   return "segredo-de-desenvolvimento-nao-usar-em-producao";
 }
 
+function readDatabaseUrl(raw: string | undefined, nodeEnv: string): string | undefined {
+  if (raw !== undefined && raw.trim() !== "") return raw;
+  if (nodeEnv === "production") {
+    throw new Error("DATABASE_URL é obrigatória quando NODE_ENV=production");
+  }
+  return undefined;
+}
+
 const nodeEnv = process.env.NODE_ENV ?? "development";
 
 export const env: Env = {
@@ -35,4 +44,5 @@ export const env: Env = {
   nodeEnv,
   jwtSecret: readSecret(process.env.JWT_SECRET, nodeEnv),
   jwtExpiracaoSegundos: readInt(process.env.JWT_EXPIRACAO_SEGUNDOS, 3600, "JWT_EXPIRACAO_SEGUNDOS"),
+  databaseUrl: readDatabaseUrl(process.env.DATABASE_URL, nodeEnv),
 };

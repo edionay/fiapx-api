@@ -4,6 +4,9 @@ node_modules/
 # Build
 dist/
 
+# Cliente Prisma gerado (recriado por `prisma generate`)
+src/gerado/
+
 # Ambiente
 .env
 .env.local
