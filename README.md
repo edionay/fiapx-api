@@ -101,6 +101,37 @@ npm run prisma:generate
 
 O modelo `Usuario` mapeia a tabela `usuarios`. A tabela de vídeos entra na etapa de vídeo.
 
+## Docker
+
+O `Dockerfile` deste repositório empacota apenas o serviço da API. Ele é multi-stage:
+compila o TypeScript e o cliente Prisma em um estágio de build e produz uma imagem final
+enxuta (só dependências de produção, usuário não-root e healthcheck em `/health`).
+
+A orquestração completa da stack (Postgres, RabbitMQ, Redis e os demais serviços) fica no
+repositório `fiapx-infra`, cujo `docker-compose.yml` referencia este Dockerfile por
+`build: ../fiapx-api`. O `docker-compose.yml` deste repositório é apenas uma conveniência
+para desenvolvimento local, subindo a API junto de um Postgres.
+
+```bash
+# sobe API + Postgres localmente (aplica as migrações antes de iniciar a API)
+docker compose up --build
+
+# a API fica em http://localhost:3000 e o Postgres em localhost:5432
+```
+
+As migrações são aplicadas por um serviço `migrate` dedicado, que roda `prisma migrate deploy`
+antes de a API iniciar. A imagem da API não executa migrações no start, mantendo o start rápido
+e previsível.
+
+```bash
+# construir e rodar apenas a imagem da API (Postgres por conta de quem chama)
+docker build -t fiapx-api .
+docker run --rm -p 3000:3000 \
+  -e DATABASE_URL="postgresql://usuario:senha@host:5432/fiapx?schema=public" \
+  -e JWT_SECRET="troque-este-segredo" \
+  fiapx-api
+```
+
 ## Testes
 
 ```bash
@@ -120,6 +151,8 @@ O código segue Clean Architecture, com as dependências apontando para o domín
 `dominio` (regras e contratos) ← `aplicacao` (casos de uso) ← `adaptadores` (Express, JWT, bcrypt, repositório).
 
 ```
+Dockerfile                    # imagem multi-stage do serviço da API
+docker-compose.yml            # conveniência local: API + Postgres
 prisma/
 ├── schema.prisma             # modelo Usuario (tabela usuarios)
 └── migrations/               # migrações versionadas
