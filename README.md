@@ -81,21 +81,30 @@ curl http://localhost:3000/auth/eu -H "Authorization: Bearer <token>"
 
 ## Vídeos
 
-O envio de vídeo é protegido por JWT. O arquivo é gravado no diretório configurado em
-`UPLOADS_DIR` e o vídeo é registrado com status `PENDENTE`.
+As rotas de vídeo são protegidas por JWT e o catálogo é sempre escopado ao dono. O arquivo
+enviado é gravado no diretório configurado em `UPLOADS_DIR` e o vídeo nasce com status `PENDENTE`.
 
 | Método | Rota | Protegida | Descrição |
 |---|---|---|---|
 | POST | `/videos` | sim | Recebe o arquivo no campo `arquivo` (multipart) e cria o vídeo como `PENDENTE`. Responde `202` com `{ "videoId", "status" }`. |
+| GET | `/videos` | sim | Lista os vídeos do usuário, do mais recente ao mais antigo. |
+| GET | `/videos/:id` | sim | Retorna o status de um vídeo do próprio usuário. Responde `404` se não existir ou for de outro dono. |
 
 ```bash
+# envio
 curl -X POST http://localhost:3000/videos \
   -H "Authorization: Bearer <token>" \
   -F "arquivo=@filme.mp4"
+
+# catálogo do usuário
+curl http://localhost:3000/videos -H "Authorization: Bearer <token>"
+
+# status de um vídeo
+curl http://localhost:3000/videos/<videoId> -H "Authorization: Bearer <token>"
 ```
 
-> Nesta fatia o vídeo apenas é recebido e persistido como `PENDENTE`. A publicação na fila
-> `videos.processar` (RabbitMQ) e o catálogo/status entram nas próximas etapas.
+> O catálogo não expõe caminhos internos de arquivo. A publicação na fila `videos.processar`
+> (RabbitMQ) e o download do pacote entram nas próximas etapas.
 
 ## Banco de dados
 

@@ -5,6 +5,7 @@ import {
   DadosInvalidos,
   EmailJaCadastrado,
   TokenInvalido,
+  VideoNaoEncontrado,
 } from "../../dominio/erros.js";
 
 export const tratadorErros: ErrorRequestHandler = (err, _req, res, _next) => {
@@ -23,6 +24,10 @@ export const tratadorErros: ErrorRequestHandler = (err, _req, res, _next) => {
   }
   if (err instanceof CredenciaisInvalidas || err instanceof TokenInvalido) {
     res.status(401).json({ erro: err.message });
+    return;
+  }
+  if (err instanceof VideoNaoEncontrado) {
+    res.status(404).json({ erro: err.message });
     return;
   }
 
