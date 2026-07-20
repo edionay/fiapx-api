@@ -20,8 +20,6 @@ import { AutenticarUsuario } from "./aplicacao/autenticar-usuario.js";
 import { EnviarVideo } from "./aplicacao/enviar-video.js";
 import { ListarVideos } from "./aplicacao/listar-videos.js";
 import { ConsultarVideo } from "./aplicacao/consultar-video.js";
-import { criarMiddlewareAuth } from "./adaptadores/http/middleware-auth.js";
-import { rotasVideo } from "./adaptadores/http/rotas-video.js";
 import { TOKENS } from "./adaptadores/http/tokens.js";
 import { tratadorErros } from "./adaptadores/http/tratador-erros.js";
 
@@ -45,7 +43,6 @@ export function buildApp(opcoes: OpcoesApp = {}): Express {
 
   const cadastrar = new CadastrarUsuario(repositorioUsuario, hashSenha, geradorId);
   const autenticar = new AutenticarUsuario(repositorioUsuario, hashSenha, servicoToken);
-  const middlewareAuth = criarMiddlewareAuth(servicoToken);
 
   const repositorioVideo =
     opcoes.repositorioVideo ?? new RepositorioVideoMemoria();
@@ -59,29 +56,29 @@ export function buildApp(opcoes: OpcoesApp = {}): Express {
   const upload = multer({
     storage: multer.memoryStorage(),
     limits: { fileSize: env.maxUploadBytes },
-  }).single("arquivo");
+  });
 
   container.reset();
   container.registerInstance(TOKENS.CadastrarUsuario, cadastrar);
   container.registerInstance(TOKENS.AutenticarUsuario, autenticar);
   container.registerInstance(TOKENS.RepositorioUsuario, repositorioUsuario);
+  container.registerInstance(TOKENS.EnviarVideo, enviarVideo);
+  container.registerInstance(TOKENS.ListarVideos, listarVideos);
+  container.registerInstance(TOKENS.ConsultarVideo, consultarVideo);
+
+  app.use((req, _res, next) => {
+    if (req.files === undefined) {
+      req.files = {};
+    }
+    next();
+  });
 
   app.get("/swagger.json", (_req, res) => {
     res.json(swaggerDocument);
   });
   app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-  RegisterRoutes(app);
-
-  app.use(
-    rotasVideo({
-      enviarVideo,
-      listarVideos,
-      consultarVideo,
-      middlewareAuth,
-      upload,
-    }),
-  );
+  RegisterRoutes(app, { multer: upload });
 
   app.use((_req, res) => {
     res.status(404).json({ erro: "Rota não encontrada" });

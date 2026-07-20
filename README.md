@@ -15,8 +15,8 @@ envio de vídeo, consulta de status/catálogo e download dos pacotes gerados.
 - **TSOA** + **Swagger UI** para rotas e documentação da API, com **tsyringe** para injeção de dependência
 - **Vitest** + **supertest** para testes
 
-> A migração das rotas para TSOA é incremental. `health` e `auth` já são controllers TSOA
-> (com JWT via `@Security` e injeção dos casos de uso por IoC); `videos` migra na próxima fatia.
+> Toda a camada HTTP usa controllers TSOA (`health`, `auth` e `videos`), com JWT via
+> `@Security` e injeção dos casos de uso por tsyringe.
 
 ## Pré-requisitos
 
@@ -200,13 +200,13 @@ prisma.config.ts              # configuração do Prisma (datasource das migraç
 src/
 ├── app.ts                    # raiz de composição: monta a aplicação Express
 ├── server.ts                 # sobe o servidor HTTP e escolhe o repositório
-├── controllers/              # controllers TSOA (health e auth; videos migra depois)
+├── controllers/              # controllers TSOA (health, auth e videos)
 ├── config/
 │   └── env.ts                # configuração lida do ambiente
 ├── dominio/                  # entidades (usuario, video), contratos e erros
 ├── aplicacao/                # casos de uso (cadastrar, autenticar, enviar vídeo) e portas
 └── adaptadores/              # repositórios (memória e Prisma), bcrypt, JWT, armazenamento
-    ├── http/                 # rotas manuais, middleware de auth e tratador de erros
+    ├── http/                 # autenticação JWT, IoC (tsyringe), tokens e tratador de erros
     └── prisma/               # criação do PrismaClient com o adapter
 test/
 ├── health.test.ts
