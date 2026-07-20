@@ -12,7 +12,7 @@ envio de vídeo, consulta de status/catálogo e download dos pacotes gerados.
 - **Express** 5
 - **TypeScript** (ESM)
 - **Postgres** com **Prisma** (driver adapter `@prisma/adapter-pg`)
-- **TSOA** + **Swagger UI** para rotas e documentação da API
+- **TSOA** + **Swagger UI** para rotas e documentação da API, com **tsyringe** para injeção de dependência
 - **Vitest** + **supertest** para testes
 
 > A migração das rotas para TSOA é incremental. `health` e `auth` já são controllers TSOA

@@ -9,11 +9,13 @@ import {
   SuccessResponse,
   Tags,
 } from "@tsoa/runtime";
+import { inject, injectable } from "tsyringe";
 import type { Request as ExRequest } from "express";
 import type { CadastrarUsuario } from "../aplicacao/cadastrar-usuario.js";
 import type { AutenticarUsuario } from "../aplicacao/autenticar-usuario.js";
 import type { RepositorioUsuario } from "../dominio/repositorio-usuario.js";
 import { UsuarioNaoEncontrado } from "../dominio/erros.js";
+import { TOKENS } from "../adaptadores/http/tokens.js";
 import type { UsuarioAutenticado } from "../adaptadores/http/tipos.js";
 
 export interface CadastroBody {
@@ -41,13 +43,14 @@ export interface EuResposta {
   criadoEm: string;
 }
 
+@injectable()
 @Route("auth")
 @Tags("Autenticação")
 export class AuthController extends Controller {
   constructor(
-    private readonly cadastrarUsuario: CadastrarUsuario,
-    private readonly autenticarUsuario: AutenticarUsuario,
-    private readonly repositorioUsuario: RepositorioUsuario,
+    @inject(TOKENS.CadastrarUsuario) private readonly cadastrarUsuario: CadastrarUsuario,
+    @inject(TOKENS.AutenticarUsuario) private readonly autenticarUsuario: AutenticarUsuario,
+    @inject(TOKENS.RepositorioUsuario) private readonly repositorioUsuario: RepositorioUsuario,
   ) {
     super();
   }

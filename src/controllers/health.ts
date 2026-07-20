@@ -1,4 +1,5 @@
 import { Controller, Get, Route, Tags } from "@tsoa/runtime";
+import { injectable } from "tsyringe";
 
 export interface HealthResposta {
   status: "ok";
@@ -7,6 +8,7 @@ export interface HealthResposta {
   uptime: number;
 }
 
+@injectable()
 @Route("health")
 @Tags("Saúde")
 export class HealthController extends Controller {
