@@ -20,8 +20,8 @@ import { EnviarVideo } from "./aplicacao/enviar-video.js";
 import { ListarVideos } from "./aplicacao/listar-videos.js";
 import { ConsultarVideo } from "./aplicacao/consultar-video.js";
 import { criarMiddlewareAuth } from "./adaptadores/http/middleware-auth.js";
-import { rotasAuth } from "./adaptadores/http/rotas-auth.js";
 import { rotasVideo } from "./adaptadores/http/rotas-video.js";
+import { definirDependencias } from "./adaptadores/http/composicao.js";
 import { tratadorErros } from "./adaptadores/http/tratador-erros.js";
 
 export interface OpcoesApp {
@@ -60,6 +60,12 @@ export function buildApp(opcoes: OpcoesApp = {}): Express {
     limits: { fileSize: env.maxUploadBytes },
   }).single("arquivo");
 
+  definirDependencias({
+    cadastrarUsuario: cadastrar,
+    autenticarUsuario: autenticar,
+    repositorioUsuario,
+  });
+
   app.get("/swagger.json", (_req, res) => {
     res.json(swaggerDocument);
   });
@@ -67,14 +73,6 @@ export function buildApp(opcoes: OpcoesApp = {}): Express {
 
   RegisterRoutes(app);
 
-  app.use(
-    rotasAuth({
-      cadastrar,
-      autenticar,
-      middlewareAuth,
-      repositorio: repositorioUsuario,
-    }),
-  );
   app.use(
     rotasVideo({
       enviarVideo,
