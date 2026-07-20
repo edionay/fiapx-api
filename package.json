@@ -8,25 +8,30 @@
   },
   "main": "dist/server.js",
   "scripts": {
-    "dev": "tsx watch src/server.ts",
-    "build": "prisma generate && tsc",
+    "gerar": "prisma generate && tsoa spec-and-routes",
+    "copiar-spec": "node -e \"const fs=require('node:fs');fs.mkdirSync('dist/gerado/tsoa',{recursive:true});fs.copyFileSync('src/gerado/tsoa/swagger.json','dist/gerado/tsoa/swagger.json')\"",
+    "dev": "npm run gerar && tsx watch src/server.ts",
+    "build": "npm run gerar && tsc && npm run copiar-spec",
     "start": "node dist/server.js",
-    "typecheck": "tsc --noEmit",
-    "test": "vitest run",
-    "test:watch": "vitest",
+    "typecheck": "npm run gerar && tsc --noEmit",
+    "test": "npm run gerar && vitest run",
+    "test:watch": "npm run gerar && vitest",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:deploy": "prisma migrate deploy",
-    "postinstall": "prisma generate"
+    "postinstall": "npm run gerar"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
+    "@tsoa/runtime": "^6.6.0",
     "bcryptjs": "^3.0.3",
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
     "multer": "^2.2.0",
-    "pg": "^8.22.0"
+    "pg": "^8.22.0",
+    "reflect-metadata": "^0.2.2",
+    "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
@@ -35,8 +40,10 @@
     "@types/node": "^26.1.1",
     "@types/pg": "^8.20.0",
     "@types/supertest": "^7.2.1",
+    "@types/swagger-ui-express": "^4.1.8",
     "prisma": "^7.8.0",
     "supertest": "^7.2.2",
+    "tsoa": "^6.6.0",
     "tsx": "^4.23.1",
     "typescript": "^7.0.2",
     "vitest": "^4.1.10"

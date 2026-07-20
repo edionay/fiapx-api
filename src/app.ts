@@ -1,7 +1,10 @@
+import "reflect-metadata";
 import express, { type Express } from "express";
 import multer from "multer";
+import swaggerUi from "swagger-ui-express";
 import { env } from "./config/env.js";
-import { healthRouter } from "./routes/health.js";
+import { RegisterRoutes } from "./gerado/tsoa/routes.js";
+import swaggerDocument from "./gerado/tsoa/swagger.json" with { type: "json" };
 import type { RepositorioUsuario } from "./dominio/repositorio-usuario.js";
 import type { RepositorioVideo } from "./dominio/repositorio-video.js";
 import type { ArmazenamentoVideo } from "./aplicacao/portas.js";
@@ -57,7 +60,13 @@ export function buildApp(opcoes: OpcoesApp = {}): Express {
     limits: { fileSize: env.maxUploadBytes },
   }).single("arquivo");
 
-  app.use(healthRouter);
+  app.get("/swagger.json", (_req, res) => {
+    res.json(swaggerDocument);
+  });
+  app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
+  RegisterRoutes(app);
+
   app.use(
     rotasAuth({
       cadastrar,

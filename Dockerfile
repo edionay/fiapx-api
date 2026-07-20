@@ -6,7 +6,7 @@ FROM base AS build
 ENV NODE_ENV=development
 COPY package.json package-lock.json ./
 RUN npm ci --ignore-scripts
-COPY tsconfig.json prisma.config.ts ./
+COPY tsconfig.json prisma.config.ts tsoa.json ./
 COPY prisma ./prisma
 COPY src ./src
 RUN npm run build

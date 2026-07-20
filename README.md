@@ -12,9 +12,11 @@ envio de vídeo, consulta de status/catálogo e download dos pacotes gerados.
 - **Express** 5
 - **TypeScript** (ESM)
 - **Postgres** com **Prisma** (driver adapter `@prisma/adapter-pg`)
+- **TSOA** + **Swagger UI** para rotas e documentação da API
 - **Vitest** + **supertest** para testes
 
-> O TSOA/Swagger entra em uma etapa seguinte.
+> A migração das rotas para TSOA é incremental. Nesta etapa o `health` já é um controller
+> TSOA; `auth` e `videos` seguem nas rotas atuais e migram nas próximas fatias.
 
 ## Pré-requisitos
 
@@ -50,6 +52,16 @@ curl http://localhost:3000/health
 ```json
 { "status": "ok", "service": "fiapx-api", "timestamp": "...", "uptime": 1.23 }
 ```
+
+## Documentação da API (Swagger)
+
+A especificação OpenAPI é gerada pelo TSOA a partir dos controllers e servida em:
+
+- **Swagger UI**: `http://localhost:3000/docs`
+- **OpenAPI JSON**: `http://localhost:3000/swagger.json`
+
+A geração roda no `postinstall` e no `build` (`npm run gerar`), produzindo as rotas e o
+`swagger.json` em `src/gerado/tsoa` (fora do controle de versão, como o cliente do Prisma).
 
 ## Autenticação
 
@@ -180,6 +192,7 @@ O código segue Clean Architecture, com as dependências apontando para o domín
 ```
 Dockerfile                    # imagem multi-stage do serviço da API
 docker-compose.yml            # conveniência local: API + Postgres
+tsoa.json                     # configuração do TSOA (controllers, spec e rotas)
 prisma/
 ├── schema.prisma             # modelo Usuario (tabela usuarios)
 └── migrations/               # migrações versionadas
@@ -187,15 +200,14 @@ prisma.config.ts              # configuração do Prisma (datasource das migraç
 src/
 ├── app.ts                    # raiz de composição: monta a aplicação Express
 ├── server.ts                 # sobe o servidor HTTP e escolhe o repositório
+├── controllers/              # controllers TSOA (health; auth e videos migram depois)
 ├── config/
 │   └── env.ts                # configuração lida do ambiente
 ├── dominio/                  # entidades (usuario, video), contratos e erros
 ├── aplicacao/                # casos de uso (cadastrar, autenticar, enviar vídeo) e portas
-├── adaptadores/              # repositórios (memória e Prisma), bcrypt, JWT, armazenamento
-│   ├── http/                 # rotas, middleware de auth e tratador de erros
-│   └── prisma/               # criação do PrismaClient com o adapter
-└── routes/
-    └── health.ts             # GET /health
+└── adaptadores/              # repositórios (memória e Prisma), bcrypt, JWT, armazenamento
+    ├── http/                 # rotas manuais, middleware de auth e tratador de erros
+    └── prisma/               # criação do PrismaClient com o adapter
 test/
 ├── health.test.ts
 ├── auth/                     # testes unitários e de integração da autenticação

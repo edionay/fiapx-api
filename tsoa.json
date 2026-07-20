@@ -1,0 +1,7 @@
+{
+  "entryFile": "src/server.ts",
+  "noImplicitAdditionalProperties": "throw-on-extras",
+  "controllerPathGlobs": ["src/controllers/**/*.ts"],
+  "spec": { "outputDirectory": "src/gerado/tsoa", "specVersion": 3 },
+  "routes": { "routesDir": "src/gerado/tsoa", "esm": true }
+}
