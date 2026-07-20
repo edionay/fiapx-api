@@ -184,6 +184,13 @@ npm run test:watch
 npm run typecheck
 ```
 
+## Integração contínua
+
+O workflow em `.github/workflows/ci.yml` roda a cada pull request e push na `main`. Ele
+sobe um Postgres de serviço, instala as dependências, aplica as migrações e executa
+`typecheck`, `test` e `build`. Como o `DATABASE_URL` está presente, os testes de
+integração com banco rodam de verdade.
+
 ## Estrutura
 
 O código segue Clean Architecture, com as dependências apontando para o domínio:
