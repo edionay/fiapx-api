@@ -12,11 +12,11 @@ envio de vídeo, consulta de status/catálogo e download dos pacotes gerados.
 - **Express** 5
 - **TypeScript** (ESM)
 - **Postgres** com **Prisma** (driver adapter `@prisma/adapter-pg`)
-- **TSOA** + **Swagger UI** para rotas e documentação da API
+- **TSOA** + **Swagger UI** para rotas e documentação da API, com **tsyringe** para injeção de dependência
 - **Vitest** + **supertest** para testes
 
-> A migração das rotas para TSOA é incremental. Nesta etapa o `health` já é um controller
-> TSOA; `auth` e `videos` seguem nas rotas atuais e migram nas próximas fatias.
+> A migração das rotas para TSOA é incremental. `health` e `auth` já são controllers TSOA
+> (com JWT via `@Security` e injeção dos casos de uso por IoC); `videos` migra na próxima fatia.
 
 ## Pré-requisitos
 
@@ -200,7 +200,7 @@ prisma.config.ts              # configuração do Prisma (datasource das migraç
 src/
 ├── app.ts                    # raiz de composição: monta a aplicação Express
 ├── server.ts                 # sobe o servidor HTTP e escolhe o repositório
-├── controllers/              # controllers TSOA (health; auth e videos migram depois)
+├── controllers/              # controllers TSOA (health e auth; videos migra depois)
 ├── config/
 │   └── env.ts                # configuração lida do ambiente
 ├── dominio/                  # entidades (usuario, video), contratos e erros

@@ -30,3 +30,9 @@ export class VideoNaoEncontrado extends ErroDominio {
     super("Vídeo não encontrado");
   }
 }
+
+export class UsuarioNaoEncontrado extends ErroDominio {
+  constructor() {
+    super("Usuário não encontrado");
+  }
+}

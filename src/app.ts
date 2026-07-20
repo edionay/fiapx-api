@@ -2,6 +2,7 @@ import "reflect-metadata";
 import express, { type Express } from "express";
 import multer from "multer";
 import swaggerUi from "swagger-ui-express";
+import { container } from "tsyringe";
 import { env } from "./config/env.js";
 import { RegisterRoutes } from "./gerado/tsoa/routes.js";
 import swaggerDocument from "./gerado/tsoa/swagger.json" with { type: "json" };
@@ -20,8 +21,8 @@ import { EnviarVideo } from "./aplicacao/enviar-video.js";
 import { ListarVideos } from "./aplicacao/listar-videos.js";
 import { ConsultarVideo } from "./aplicacao/consultar-video.js";
 import { criarMiddlewareAuth } from "./adaptadores/http/middleware-auth.js";
-import { rotasAuth } from "./adaptadores/http/rotas-auth.js";
 import { rotasVideo } from "./adaptadores/http/rotas-video.js";
+import { TOKENS } from "./adaptadores/http/tokens.js";
 import { tratadorErros } from "./adaptadores/http/tratador-erros.js";
 
 export interface OpcoesApp {
@@ -60,6 +61,11 @@ export function buildApp(opcoes: OpcoesApp = {}): Express {
     limits: { fileSize: env.maxUploadBytes },
   }).single("arquivo");
 
+  container.reset();
+  container.registerInstance(TOKENS.CadastrarUsuario, cadastrar);
+  container.registerInstance(TOKENS.AutenticarUsuario, autenticar);
+  container.registerInstance(TOKENS.RepositorioUsuario, repositorioUsuario);
+
   app.get("/swagger.json", (_req, res) => {
     res.json(swaggerDocument);
   });
@@ -67,14 +73,6 @@ export function buildApp(opcoes: OpcoesApp = {}): Express {
 
   RegisterRoutes(app);
 
-  app.use(
-    rotasAuth({
-      cadastrar,
-      autenticar,
-      middlewareAuth,
-      repositorio: repositorioUsuario,
-    }),
-  );
   app.use(
     rotasVideo({
       enviarVideo,
