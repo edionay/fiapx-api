@@ -94,7 +94,10 @@ curl http://localhost:3000/auth/eu -H "Authorization: Bearer <token>"
 ## Vídeos
 
 As rotas de vídeo são protegidas por JWT e o catálogo é sempre escopado ao dono. O arquivo
-enviado é gravado no diretório configurado em `UPLOADS_DIR` e o vídeo nasce com status `PENDENTE`.
+enviado é gravado no diretório configurado em `UPLOADS_DIR`, o vídeo nasce com status `PENDENTE`
+e a API publica `videos.processar` no RabbitMQ para o worker processar (contrato no
+[fiapx-infra](https://github.com/edionay/fiapx-infra)). Sem `RABBITMQ_URL`, a publicação fica
+desligada e o vídeo apenas fica registrado.
 
 | Método | Rota | Protegida | Descrição |
 |---|---|---|---|
@@ -115,8 +118,8 @@ curl http://localhost:3000/videos -H "Authorization: Bearer <token>"
 curl http://localhost:3000/videos/<videoId> -H "Authorization: Bearer <token>"
 ```
 
-> O catálogo não expõe caminhos internos de arquivo. A publicação na fila `videos.processar`
-> (RabbitMQ) e o download do pacote entram nas próximas etapas.
+> O catálogo não expõe caminhos internos de arquivo. O consumo de `videos.resultado` (para
+> atualizar o status) e o download do pacote entram nas próximas etapas.
 
 ## Banco de dados
 
@@ -214,6 +217,7 @@ src/
 ├── aplicacao/                # casos de uso (cadastrar, autenticar, enviar vídeo) e portas
 └── adaptadores/              # repositórios (memória e Prisma), bcrypt, JWT, armazenamento
     ├── http/                 # autenticação JWT, IoC (tsyringe), tokens e tratador de erros
+    ├── mensageria/           # publicação no RabbitMQ (videos.processar) e publisher nulo
     └── prisma/               # criação do PrismaClient com o adapter
 test/
 ├── health.test.ts

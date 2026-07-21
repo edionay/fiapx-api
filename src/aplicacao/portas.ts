@@ -20,3 +20,7 @@ export interface ServicoToken {
 export interface ArmazenamentoVideo {
   salvarEntrada(videoId: string, nomeOriginal: string, conteudo: Buffer): Promise<string>;
 }
+
+export interface PublicadorProcessamento {
+  publicar(videoId: string, caminhoEntrada: string): Promise<void>;
+}

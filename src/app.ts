@@ -8,10 +8,11 @@ import { RegisterRoutes } from "./gerado/tsoa/routes.js";
 import swaggerDocument from "./gerado/tsoa/swagger.json" with { type: "json" };
 import type { RepositorioUsuario } from "./dominio/repositorio-usuario.js";
 import type { RepositorioVideo } from "./dominio/repositorio-video.js";
-import type { ArmazenamentoVideo } from "./aplicacao/portas.js";
+import type { ArmazenamentoVideo, PublicadorProcessamento } from "./aplicacao/portas.js";
 import { RepositorioUsuarioMemoria } from "./adaptadores/repositorio-usuario-memoria.js";
 import { RepositorioVideoMemoria } from "./adaptadores/repositorio-video-memoria.js";
 import { ArmazenamentoVideoSistemaArquivos } from "./adaptadores/armazenamento-video-fs.js";
+import { PublicadorProcessamentoNulo } from "./adaptadores/mensageria/publicador-processamento-nulo.js";
 import { HashSenhaBcrypt } from "./adaptadores/hash-senha-bcrypt.js";
 import { GeradorIdUuid } from "./adaptadores/gerador-id-uuid.js";
 import { ServicoTokenJwt } from "./adaptadores/servico-token-jwt.js";
@@ -27,6 +28,7 @@ export interface OpcoesApp {
   repositorioUsuario?: RepositorioUsuario;
   repositorioVideo?: RepositorioVideo;
   armazenamentoVideo?: ArmazenamentoVideo;
+  publicadorProcessamento?: PublicadorProcessamento;
 }
 
 export function buildApp(opcoes: OpcoesApp = {}): Express {
@@ -49,7 +51,14 @@ export function buildApp(opcoes: OpcoesApp = {}): Express {
   const armazenamentoVideo =
     opcoes.armazenamentoVideo ??
     new ArmazenamentoVideoSistemaArquivos(env.uploadsDir);
-  const enviarVideo = new EnviarVideo(repositorioVideo, armazenamentoVideo, geradorId);
+  const publicadorProcessamento =
+    opcoes.publicadorProcessamento ?? new PublicadorProcessamentoNulo();
+  const enviarVideo = new EnviarVideo(
+    repositorioVideo,
+    armazenamentoVideo,
+    geradorId,
+    publicadorProcessamento,
+  );
   const listarVideos = new ListarVideos(repositorioVideo);
   const consultarVideo = new ConsultarVideo(repositorioVideo);
 
