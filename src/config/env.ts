@@ -4,6 +4,7 @@ export interface Env {
   readonly jwtSecret: string;
   readonly jwtExpiracaoSegundos: number;
   readonly databaseUrl: string | undefined;
+  readonly rabbitmqUrl: string | undefined;
   readonly uploadsDir: string;
   readonly maxUploadBytes: number;
 }
@@ -47,6 +48,7 @@ export const env: Env = {
   jwtSecret: readSecret(process.env.JWT_SECRET, nodeEnv),
   jwtExpiracaoSegundos: readInt(process.env.JWT_EXPIRACAO_SEGUNDOS, 3600, "JWT_EXPIRACAO_SEGUNDOS"),
   databaseUrl: readDatabaseUrl(process.env.DATABASE_URL, nodeEnv),
+  rabbitmqUrl: process.env.RABBITMQ_URL?.trim() || undefined,
   uploadsDir: process.env.UPLOADS_DIR?.trim() || "/data/uploads",
   maxUploadBytes: readInt(process.env.MAX_UPLOAD_BYTES, 100 * 1024 * 1024, "MAX_UPLOAD_BYTES"),
 };

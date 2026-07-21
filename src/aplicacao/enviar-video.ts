@@ -1,7 +1,11 @@
 import type { RepositorioVideo } from "../dominio/repositorio-video.js";
 import type { Video } from "../dominio/video.js";
 import { DadosInvalidos } from "../dominio/erros.js";
-import type { ArmazenamentoVideo, GeradorId } from "./portas.js";
+import type {
+  ArmazenamentoVideo,
+  GeradorId,
+  PublicadorProcessamento,
+} from "./portas.js";
 
 export interface EntradaEnvioVideo {
   usuarioId: string;
@@ -19,6 +23,7 @@ export class EnviarVideo {
     private readonly repositorio: RepositorioVideo,
     private readonly armazenamento: ArmazenamentoVideo,
     private readonly geradorId: GeradorId,
+    private readonly publicador: PublicadorProcessamento,
   ) {}
 
   async executar(entrada: EntradaEnvioVideo): Promise<ResultadoEnvioVideo> {
@@ -53,6 +58,7 @@ export class EnviarVideo {
     };
 
     await this.repositorio.salvar(video);
+    await this.publicador.publicar(video.id, video.caminhoEntrada);
 
     return { videoId: id, status: video.status };
   }
