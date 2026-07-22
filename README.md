@@ -106,6 +106,7 @@ vídeo apenas fica registrado.
 | POST | `/videos` | sim | Recebe o arquivo no campo `arquivo` (multipart) e cria o vídeo como `PENDENTE`. Responde `202` com `{ "videoId", "status" }`. |
 | GET | `/videos` | sim | Lista os vídeos do usuário, do mais recente ao mais antigo. |
 | GET | `/videos/:id` | sim | Retorna o status de um vídeo do próprio usuário. Responde `404` se não existir ou for de outro dono. |
+| GET | `/videos/:id/download` | sim | Baixa o `.zip` dos frames. Responde `409` se o vídeo ainda não foi concluído e `404` se não for do usuário. |
 
 ```bash
 # envio
@@ -118,9 +119,13 @@ curl http://localhost:3000/videos -H "Authorization: Bearer <token>"
 
 # status de um vídeo
 curl http://localhost:3000/videos/<videoId> -H "Authorization: Bearer <token>"
+
+# download do pacote (quando CONCLUIDO)
+curl -OJ http://localhost:3000/videos/<videoId>/download -H "Authorization: Bearer <token>"
 ```
 
-> O catálogo não expõe caminhos internos de arquivo. O download do pacote entra na próxima etapa.
+> O catálogo não expõe caminhos internos de arquivo. O download serve o `.zip` do volume
+> compartilhado, validando propriedade e disponibilidade.
 
 ## Banco de dados
 

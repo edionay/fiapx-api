@@ -21,6 +21,7 @@ import { AutenticarUsuario } from "./aplicacao/autenticar-usuario.js";
 import { EnviarVideo } from "./aplicacao/enviar-video.js";
 import { ListarVideos } from "./aplicacao/listar-videos.js";
 import { ConsultarVideo } from "./aplicacao/consultar-video.js";
+import { BaixarVideo } from "./aplicacao/baixar-video.js";
 import { TOKENS } from "./adaptadores/http/tokens.js";
 import { tratadorErros } from "./adaptadores/http/tratador-erros.js";
 
@@ -61,6 +62,7 @@ export function buildApp(opcoes: OpcoesApp = {}): Express {
   );
   const listarVideos = new ListarVideos(repositorioVideo);
   const consultarVideo = new ConsultarVideo(repositorioVideo);
+  const baixarVideo = new BaixarVideo(repositorioVideo);
 
   const upload = multer({
     storage: multer.memoryStorage(),
@@ -74,6 +76,7 @@ export function buildApp(opcoes: OpcoesApp = {}): Express {
   container.registerInstance(TOKENS.EnviarVideo, enviarVideo);
   container.registerInstance(TOKENS.ListarVideos, listarVideos);
   container.registerInstance(TOKENS.ConsultarVideo, consultarVideo);
+  container.registerInstance(TOKENS.BaixarVideo, baixarVideo);
 
   app.use((req, _res, next) => {
     if (req.files === undefined) {

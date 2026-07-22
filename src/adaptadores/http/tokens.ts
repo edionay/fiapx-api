@@ -5,4 +5,5 @@ export const TOKENS = {
   EnviarVideo: "EnviarVideo",
   ListarVideos: "ListarVideos",
   ConsultarVideo: "ConsultarVideo",
+  BaixarVideo: "BaixarVideo",
 } as const;
