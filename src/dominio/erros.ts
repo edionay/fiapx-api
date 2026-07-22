@@ -36,3 +36,9 @@ export class UsuarioNaoEncontrado extends ErroDominio {
     super("Usuário não encontrado");
   }
 }
+
+export class PacoteIndisponivel extends ErroDominio {
+  constructor() {
+    super("O pacote deste vídeo ainda não está disponível");
+  }
+}

@@ -3,6 +3,7 @@ import {
   Get,
   Path,
   Post,
+  Produces,
   Request,
   Route,
   Security,
@@ -11,11 +12,14 @@ import {
   UploadedFile,
 } from "@tsoa/runtime";
 import { inject, injectable } from "tsyringe";
+import { existsSync } from "node:fs";
 import type { Request as ExRequest } from "express";
 import type { EnviarVideo } from "../aplicacao/enviar-video.js";
 import type { ListarVideos } from "../aplicacao/listar-videos.js";
 import type { ConsultarVideo } from "../aplicacao/consultar-video.js";
+import type { BaixarVideo } from "../aplicacao/baixar-video.js";
 import type { Video } from "../dominio/video.js";
+import { PacoteIndisponivel } from "../dominio/erros.js";
 import { TOKENS } from "../adaptadores/http/tokens.js";
 import type { UsuarioAutenticado } from "../adaptadores/http/tipos.js";
 
@@ -53,6 +57,7 @@ export class VideosController extends Controller {
     @inject(TOKENS.EnviarVideo) private readonly enviarVideo: EnviarVideo,
     @inject(TOKENS.ListarVideos) private readonly listarVideos: ListarVideos,
     @inject(TOKENS.ConsultarVideo) private readonly consultarVideo: ConsultarVideo,
+    @inject(TOKENS.BaixarVideo) private readonly baixarVideo: BaixarVideo,
   ) {
     super();
   }
@@ -88,5 +93,34 @@ export class VideosController extends Controller {
     const usuario = request.user as UsuarioAutenticado;
     const video = await this.consultarVideo.executar(usuario.id, id);
     return paraResposta(video);
+  }
+
+  @Get("{id}/download")
+  @Produces("application/zip")
+  public async baixar(
+    @Request() request: ExRequest,
+    @Path() id: string,
+  ): Promise<void> {
+    const usuario = request.user as UsuarioAutenticado;
+    const pacote = await this.baixarVideo.executar(usuario.id, id);
+
+    if (!existsSync(pacote.caminhoZip)) {
+      throw new PacoteIndisponivel();
+    }
+
+    const resposta = request.res;
+    if (resposta === undefined) {
+      return;
+    }
+
+    await new Promise<void>((resolver, rejeitar) => {
+      resposta.download(pacote.caminhoZip, pacote.nomeArquivo, (erro) => {
+        if (erro !== undefined && !resposta.headersSent) {
+          rejeitar(erro);
+        } else {
+          resolver();
+        }
+      });
+    });
   }
 }

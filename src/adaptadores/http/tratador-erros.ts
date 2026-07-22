@@ -5,6 +5,7 @@ import {
   CredenciaisInvalidas,
   DadosInvalidos,
   EmailJaCadastrado,
+  PacoteIndisponivel,
   TokenInvalido,
   UsuarioNaoEncontrado,
   VideoNaoEncontrado,
@@ -24,7 +25,7 @@ export const tratadorErros: ErrorRequestHandler = (err, _req, res, _next) => {
     res.status(400).json({ erro: err.message });
     return;
   }
-  if (err instanceof EmailJaCadastrado) {
+  if (err instanceof EmailJaCadastrado || err instanceof PacoteIndisponivel) {
     res.status(409).json({ erro: err.message });
     return;
   }
