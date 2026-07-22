@@ -24,3 +24,7 @@ export interface ArmazenamentoVideo {
 export interface PublicadorProcessamento {
   publicar(videoId: string, caminhoEntrada: string): Promise<void>;
 }
+
+export interface PublicadorNotificacao {
+  publicar(videoId: string, emailUsuario: string, mensagemErro: string): Promise<void>;
+}

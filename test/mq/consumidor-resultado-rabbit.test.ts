@@ -3,6 +3,8 @@ import { randomUUID } from "node:crypto";
 import amqp, { type Channel, type ChannelModel } from "amqplib";
 import { RegistrarResultado } from "../../src/aplicacao/registrar-resultado.js";
 import { RepositorioVideoMemoria } from "../../src/adaptadores/repositorio-video-memoria.js";
+import { RepositorioUsuarioMemoria } from "../../src/adaptadores/repositorio-usuario-memoria.js";
+import { PublicadorNotificacaoNulo } from "../../src/adaptadores/mensageria/publicador-notificacao-nulo.js";
 import { iniciarConsumoResultado } from "../../src/adaptadores/mensageria/consumidor-resultado-rabbit.js";
 
 const url = process.env.RABBITMQ_URL;
@@ -39,7 +41,12 @@ describe.skipIf(!url)("consumidor de videos.resultado", () => {
       atualizadoEm: agora,
     });
 
-    await iniciarConsumoResultado(canal, new RegistrarResultado(repositorio), fila);
+    const registrar = new RegistrarResultado(
+      repositorio,
+      new RepositorioUsuarioMemoria(),
+      new PublicadorNotificacaoNulo(),
+    );
+    await iniciarConsumoResultado(canal, registrar, fila);
 
     canal.sendToQueue(
       fila,

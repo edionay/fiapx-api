@@ -98,8 +98,9 @@ enviado é gravado no diretório configurado em `UPLOADS_DIR`, o vídeo nasce co
 e a API publica `videos.processar` no RabbitMQ para o worker processar (contrato no
 [fiapx-infra](https://github.com/edionay/fiapx-infra)). A API também consome `videos.resultado`
 e traduz cada mensagem em mudança de status: `PROCESSANDO`, `CONCLUIDO` com o caminho do zip,
-ou `ERRO` com a mensagem para o usuário. Sem `RABBITMQ_URL`, a mensageria fica desligada e o
-vídeo apenas fica registrado.
+ou `ERRO` com a mensagem para o usuário. No caso de `ERRO`, publica `notificacoes` com o e-mail
+do dono para o serviço de notificação avisá-lo. Sem `RABBITMQ_URL`, a mensageria fica desligada
+e o vídeo apenas fica registrado.
 
 | Método | Rota | Protegida | Descrição |
 |---|---|---|---|
