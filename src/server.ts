@@ -33,7 +33,12 @@ if (env.rabbitmqUrl !== undefined) {
   const rabbit = await conectarRabbit(env.rabbitmqUrl);
   publicadorProcessamento = rabbit.publicadorProcessamento;
   fecharRabbit = rabbit.fechar;
-  await rabbit.consumirResultado(new RegistrarResultado(repositorioVideo));
+  const registrar = new RegistrarResultado(
+    repositorioVideo,
+    repositorioUsuario,
+    rabbit.publicadorNotificacao,
+  );
+  await rabbit.consumirResultado(registrar);
   console.log("Mensageria: RabbitMQ (publicando e consumindo)");
 } else {
   console.log("Mensageria: desligada (defina RABBITMQ_URL para publicar)");

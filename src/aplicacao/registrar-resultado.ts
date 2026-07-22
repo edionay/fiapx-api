@@ -1,4 +1,6 @@
 import type { RepositorioVideo } from "../dominio/repositorio-video.js";
+import type { RepositorioUsuario } from "../dominio/repositorio-usuario.js";
+import type { PublicadorNotificacao } from "./portas.js";
 
 export interface EntradaResultado {
   videoId: unknown;
@@ -15,7 +17,11 @@ function ehStatusAceito(valor: unknown): valor is StatusResultado {
 }
 
 export class RegistrarResultado {
-  constructor(private readonly repositorio: RepositorioVideo) {}
+  constructor(
+    private readonly repositorio: RepositorioVideo,
+    private readonly repositorioUsuario: RepositorioUsuario,
+    private readonly publicadorNotificacao: PublicadorNotificacao,
+  ) {}
 
   async executar(entrada: EntradaResultado): Promise<boolean> {
     const videoId = typeof entrada.videoId === "string" ? entrada.videoId : "";
@@ -45,6 +51,18 @@ export class RegistrarResultado {
     }
 
     await this.repositorio.salvar(video);
+
+    if (entrada.status === "ERRO") {
+      const dono = await this.repositorioUsuario.buscarPorId(video.usuarioId);
+      if (dono !== null) {
+        await this.publicadorNotificacao.publicar(
+          video.id,
+          dono.email,
+          video.mensagemErro ?? "",
+        );
+      }
+    }
+
     return true;
   }
 }
