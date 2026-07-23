@@ -211,9 +211,9 @@ npm run typecheck
 ## Integração contínua
 
 O workflow em `.github/workflows/ci.yml` roda a cada pull request e push na `main`. Ele
-sobe um Postgres de serviço, instala as dependências, aplica as migrações e executa
-`typecheck`, `test` e `build`. Como o `DATABASE_URL` está presente, os testes de
-integração com banco rodam de verdade.
+sobe um Postgres e um RabbitMQ de serviço, instala as dependências, aplica as migrações e
+executa `typecheck`, `test` e `build`. Como o `DATABASE_URL` e o `RABBITMQ_URL` estão
+presentes, os testes de integração com banco e com a fila rodam de verdade.
 
 ## Estrutura
 
