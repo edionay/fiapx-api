@@ -53,6 +53,20 @@ curl http://localhost:3000/health
 { "status": "ok", "service": "fiapx-api", "timestamp": "...", "uptime": 1.23 }
 ```
 
+### Métricas (Prometheus)
+
+A API expõe métricas no formato do Prometheus em `/metrics`, prontas para scrape:
+
+```bash
+curl http://localhost:3000/metrics
+```
+
+Além das métricas padrão do Node (memória, CPU, event loop e coletor de lixo), o endpoint
+publica `http_requests_total` e `http_request_duration_seconds` com os rótulos `method`,
+`route` e `status`, o que cobre taxa de requisições, latência e taxa de erro. Todas as séries
+levam o rótulo `service="fiapx-api"`. O scrape e os dashboards ficam no
+[`fiapx-infra`](https://github.com/edionay/fiapx-infra).
+
 ## Documentação da API (Swagger)
 
 A especificação OpenAPI é gerada pelo TSOA a partir dos controllers e servida em:

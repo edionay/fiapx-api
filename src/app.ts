@@ -24,6 +24,7 @@ import { ConsultarVideo } from "./aplicacao/consultar-video.js";
 import { BaixarVideo } from "./aplicacao/baixar-video.js";
 import { TOKENS } from "./adaptadores/http/tokens.js";
 import { tratadorErros } from "./adaptadores/http/tratador-erros.js";
+import { criarMetricas } from "./adaptadores/http/metricas.js";
 
 export interface OpcoesApp {
   repositorioUsuario?: RepositorioUsuario;
@@ -34,6 +35,9 @@ export interface OpcoesApp {
 
 export function buildApp(opcoes: OpcoesApp = {}): Express {
   const app = express();
+
+  const metricas = criarMetricas();
+  app.use(metricas.middleware);
 
   app.use(express.json());
 
@@ -83,6 +87,11 @@ export function buildApp(opcoes: OpcoesApp = {}): Express {
       req.files = {};
     }
     next();
+  });
+
+  app.get("/metrics", async (_req, res) => {
+    res.set("Content-Type", metricas.registro.contentType);
+    res.send(await metricas.registro.metrics());
   });
 
   app.get("/swagger.json", (_req, res) => {
