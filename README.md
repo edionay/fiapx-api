@@ -77,6 +77,12 @@ A especificação OpenAPI é gerada pelo TSOA a partir dos controllers e servida
 A geração roda no `postinstall` e no `build` (`npm run gerar`), produzindo as rotas e o
 `swagger.json` em `src/gerado/tsoa` (fora do controle de versão, como o cliente do Prisma).
 
+## CORS
+
+A API responde a requisições de navegador com **CORS**. As origens liberadas vêm da variável
+`CORS_ORIGIN` (lista separada por vírgula), com padrão `http://localhost:5173`, a origem do
+frontend em desenvolvimento. Origens fora da lista não recebem o cabeçalho de liberação.
+
 ## Autenticação
 
 O acesso às rotas protegidas usa **JWT** no cabeçalho `Authorization: Bearer <token>`.
