@@ -1,5 +1,6 @@
 import "reflect-metadata";
 import express, { type Express } from "express";
+import cors from "cors";
 import multer from "multer";
 import swaggerUi from "swagger-ui-express";
 import { container } from "tsyringe";
@@ -38,6 +39,8 @@ export function buildApp(opcoes: OpcoesApp = {}): Express {
 
   const metricas = criarMetricas();
   app.use(metricas.middleware);
+
+  app.use(cors({ origin: env.corsOrigins }));
 
   app.use(express.json());
 

@@ -7,6 +7,7 @@ export interface Env {
   readonly rabbitmqUrl: string | undefined;
   readonly uploadsDir: string;
   readonly maxUploadBytes: number;
+  readonly corsOrigins: string[];
 }
 
 function readInt(raw: string | undefined, fallback: number, nome: string): number {
@@ -40,6 +41,14 @@ function readDatabaseUrl(raw: string | undefined, nodeEnv: string): string | und
   return undefined;
 }
 
+function readOrigins(raw: string | undefined, fallback: string[]): string[] {
+  if (raw === undefined || raw.trim() === "") return fallback;
+  return raw
+    .split(",")
+    .map((origem) => origem.trim())
+    .filter((origem) => origem !== "");
+}
+
 const nodeEnv = process.env.NODE_ENV ?? "development";
 
 export const env: Env = {
@@ -51,4 +60,5 @@ export const env: Env = {
   rabbitmqUrl: process.env.RABBITMQ_URL?.trim() || undefined,
   uploadsDir: process.env.UPLOADS_DIR?.trim() || "/data/uploads",
   maxUploadBytes: readInt(process.env.MAX_UPLOAD_BYTES, 100 * 1024 * 1024, "MAX_UPLOAD_BYTES"),
+  corsOrigins: readOrigins(process.env.CORS_ORIGIN, ["http://localhost:5173"]),
 };
